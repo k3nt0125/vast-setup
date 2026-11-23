@@ -1,6 +1,6 @@
 #!/bin/bash
 # =============================================================
-# Vast.ai ComfyUI 自動セットアップスクリプト（WAN 2.2 + 画像生成 + NAS自動送信）
+# Vast.ai ComfyUI 自動セットアップスクリプト（WAN 2.2 I2V + 静止画 + NAS自動送信）
 #
 # Vast.ai テンプレートの環境変数（Environment Variables）に入れるもの：
 #   PROVISIONING_SCRIPT = このファイルの Raw URL
@@ -21,42 +21,57 @@ MODELS="${COMFY}/models"
 WAN="https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files"
 
 # ---------- ここを自分用に書き換える ----------
+# 使わないものは行頭に # を付ければダウンロードされません。
 
-# WAN 動画モデル本体（high と low で1セット）
+# 【動画】画像から動画（I2V）の本体（high と low で1セット、各13GB）
 DIFFUSION_MODELS=(
-  "wan2.2_t2v_high_noise_14B_fp8_scaled.safetensors|${WAN}/diffusion_models/wan2.2_t2v_high_noise_14B_fp8_scaled.safetensors"
-  "wan2.2_t2v_low_noise_14B_fp8_scaled.safetensors|${WAN}/diffusion_models/wan2.2_t2v_low_noise_14B_fp8_scaled.safetensors"
-  # 画像から動画（I2V）も使うなら下の2行の # を消す
-  # "wan2.2_i2v_high_noise_14B_fp8_scaled.safetensors|${WAN}/diffusion_models/wan2.2_i2v_high_noise_14B_fp8_scaled.safetensors"
-  # "wan2.2_i2v_low_noise_14B_fp8_scaled.safetensors|${WAN}/diffusion_models/wan2.2_i2v_low_noise_14B_fp8_scaled.safetensors"
+  "wan2.2_i2v_high_noise_14B_fp8_scaled.safetensors|${WAN}/diffusion_models/wan2.2_i2v_high_noise_14B_fp8_scaled.safetensors"
+  "wan2.2_i2v_low_noise_14B_fp8_scaled.safetensors|${WAN}/diffusion_models/wan2.2_i2v_low_noise_14B_fp8_scaled.safetensors"
+  # 文章から動画（T2V）も使いたくなったら下の2行の # を消す
+  # "wan2.2_t2v_high_noise_14B_fp8_scaled.safetensors|${WAN}/diffusion_models/wan2.2_t2v_high_noise_14B_fp8_scaled.safetensors"
+  # "wan2.2_t2v_low_noise_14B_fp8_scaled.safetensors|${WAN}/diffusion_models/wan2.2_t2v_low_noise_14B_fp8_scaled.safetensors"
 )
 
+# 【動画】文章を読む部品・映像に変える部品（WAN に必須）
 TEXT_ENCODERS=(
   "umt5_xxl_fp8_e4m3fn_scaled.safetensors|${WAN}/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors"
 )
-
 VAES=(
   "wan_2.1_vae.safetensors|${WAN}/vae/wan_2.1_vae.safetensors"
 )
 
-# 画像生成用の本体モデル（Civitai のダウンロードリンクを入れる）
+# 【静止画】本体モデル
 CHECKPOINTS=(
-  # "my_illustrious_model.safetensors|https://civitai.red/api/download/models/番号"
+  "NSFW_from_HaDeS_v4.4.75.safetensors|https://civitai.red/api/download/models/3426026?fileId=3320983"
 )
 
 # LoRA
 LORAS=(
-  # WAN 高速化（4ステップ）
-  "wan2.2_t2v_lightx2v_4steps_lora_v1.1_high_noise.safetensors|${WAN}/loras/wan2.2_t2v_lightx2v_4steps_lora_v1.1_high_noise.safetensors"
-  "wan2.2_t2v_lightx2v_4steps_lora_v1.1_low_noise.safetensors|${WAN}/loras/wan2.2_t2v_lightx2v_4steps_lora_v1.1_low_noise.safetensors"
-  # WAN 用 Foot Focus
-  "wan_foot_focus_missionary.safetensors|https://civitai.red/api/download/models/1610463?fileId=1510560"
-  # 画像用（Illustrious）LoRA の例
-  # "pressed_missionary_illustrious.safetensors|https://civitai.red/api/download/models/番号"
+  # 【動画】I2V 高速化（4ステップ、high と low で1セット）
+  "wan2.2_i2v_lightx2v_4steps_lora_v1_high_noise.safetensors|${WAN}/loras/wan2.2_i2v_lightx2v_4steps_lora_v1_high_noise.safetensors"
+  "wan2.2_i2v_lightx2v_4steps_lora_v1_low_noise.safetensors|${WAN}/loras/wan2.2_i2v_lightx2v_4steps_lora_v1_low_noise.safetensors"
+  # 【動画】I2V 用（high 側のみ。low 側が手に入ったら下に追加）
+  "wan2.2_i2v_highnoise_pov_missionary_v1.0.safetensors|https://civitai.red/api/download/models/2098405?fileId=1994044"
+  # 【動画】WAN 2.2 用（high 側のみ。T2V用かI2V用か未確認）
+  "NSFW-22-H-e8.safetensors|https://civitai.red/api/download/models/2073605?fileId=1969798"
+  # 【静止画】Illustrious 用
+  "IFL_v1.0_IL.safetensors|https://civitai.red/api/download/models/2211883?fileId=2104890"
+  # 【T2V専用・今は使わない】
+  # "wan2.2_t2v_lightx2v_4steps_lora_v1.1_high_noise.safetensors|${WAN}/loras/wan2.2_t2v_lightx2v_4steps_lora_v1.1_high_noise.safetensors"
+  # "wan2.2_t2v_lightx2v_4steps_lora_v1.1_low_noise.safetensors|${WAN}/loras/wan2.2_t2v_lightx2v_4steps_lora_v1.1_low_noise.safetensors"
+  # "wan_foot_focus_missionary.safetensors|https://civitai.red/api/download/models/1610463?fileId=1510560"
+)
+
+# 【静止画】人物参考（IPAdapter）
+IPADAPTERS=(
+  "ip-adapter-plus_sdxl_vit-h.safetensors|https://huggingface.co/h94/IP-Adapter/resolve/main/sdxl_models/ip-adapter-plus_sdxl_vit-h.safetensors"
+)
+CLIP_VISION=(
+  "CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors|https://huggingface.co/h94/IP-Adapter/resolve/main/models/image_encoder/model.safetensors"
 )
 
 CUSTOM_NODES=(
-  # "https://github.com/ltdrdata/ComfyUI-Manager"
+  "https://github.com/cubiq/ComfyUI_IPAdapter_plus"
 )
 
 # NAS に送るフォルダ（ここに移したファイルだけが NAS に届く）
@@ -171,6 +186,8 @@ fetch_list "${MODELS}/text_encoders"    "${TEXT_ENCODERS[@]}"
 fetch_list "${MODELS}/vae"              "${VAES[@]}"
 fetch_list "${MODELS}/loras"            "${LORAS[@]}"
 fetch_list "${MODELS}/checkpoints"      "${CHECKPOINTS[@]}"
+fetch_list "${MODELS}/ipadapter"        "${IPADAPTERS[@]}"
+fetch_list "${MODELS}/clip_vision"      "${CLIP_VISION[@]}"
 fetch_list "${MODELS}/diffusion_models" "${DIFFUSION_MODELS[@]}"
 
 echo "=== セットアップ完了 ==="
