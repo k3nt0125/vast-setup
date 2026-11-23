@@ -42,8 +42,8 @@ VAES=(
 # LoRA（追加の味付け。高速化用や Civitai のものなど）
 LORAS=(
   # 高速化（4ステップ生成、T2V用。2つで1セット）
-  # "wan2.2_t2v_lightx2v_4steps_lora_v1.1_high_noise.safetensors|${WAN}/loras/wan2.2_t2v_lightx2v_4steps_lora_v1.1_high_noise.safetensors"
-  # "wan2.2_t2v_lightx2v_4steps_lora_v1.1_low_noise.safetensors|${WAN}/loras/wan2.2_t2v_lightx2v_4steps_lora_v1.1_low_noise.safetensors"
+  "wan2.2_t2v_lightx2v_4steps_lora_v1.1_high_noise.safetensors|${WAN}/loras/wan2.2_t2v_lightx2v_4steps_lora_v1.1_high_noise.safetensors"
+  "wan2.2_t2v_lightx2v_4steps_lora_v1.1_low_noise.safetensors|${WAN}/loras/wan2.2_t2v_lightx2v_4steps_lora_v1.1_low_noise.safetensors"
 
   # Civitai の例（数字はモデルページの modelVersionId）
   # "my_lora.safetensors|https://civitai.com/api/download/models/234567"
